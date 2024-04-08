@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { SignaturePageProps } from './types';
 import styles from '../../MultiSig.module.sass';
 import { toast } from 'react-toastify';
@@ -33,6 +33,22 @@ const SignaturePage = ({ setBroadcastResponse }: SignaturePageProps) => {
 	const [txMemo, setTxMemo] = useRecoilState(multiSigTxMemoAtom);
 	const [multiSigManualAccounts, setMultiSigManualAccounts] = useRecoilState(multiSigManualAccountsAtom);
 
+	useEffect(() => {
+		if (!connectedWallet) {
+			return
+		}
+		
+		console.log ("Connected", connectedWallet)
+		const { windowKey } = connectedWallet?.walletInfo
+		window[windowKey].defaultOptions = {
+			sign: {
+				preferNoSetFee: true,
+				preferNoSetMemo: true
+			}
+		};
+		console.log(window)
+	}, [connectedWallet])
+	
 	const hasRequiredNumberOfSignatures = useMemo(() => {
 		if (!multiSigAccount) return false;
 		return parseInt(multiSigAccount.pubkey.value.threshold) === encodedSignatures.length;
@@ -54,6 +70,7 @@ const SignaturePage = ({ setBroadcastResponse }: SignaturePageProps) => {
 			return;
 		}
 
+		console.log(multiSigAccount);
 		const { multiSend } = cosmos.bank.v1beta1.MessageComposer.withTypeUrl;
 
 		const totalAmountsByDenom = multiSendRecipients.reduce((acc, recipient) => {
