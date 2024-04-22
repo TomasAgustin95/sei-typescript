@@ -1,12 +1,13 @@
 import React from 'react';
 import { useRecoilState } from 'recoil';
 import Dropdown from 'react-dropdown';
-import { IoCheckmarkCircleSharp } from 'react-icons/io5';
-import { WalletWindowKey } from '@sei-js/core';
 import { useWallet } from '@sei-js/react';
+import styles from './ChainInfo.module.sass';
 
-import { selectedChainConfigAtom, customChainIdAtom, customRestUrlAtom, customRpcUrlAtom } from '../../recoil';
+import { customChainIdAtom, customRestUrlAtom, customRpcUrlAtom, selectedChainConfigAtom } from '../../recoil';
 import './styles.css';
+import { DEFAULT_CHAINS } from '../../config/chains';
+import CodeExecute from '../CodeExecute/CodeExecute';
 
 const ChainInfo = () => {
 	const wallet = useWallet();
@@ -17,75 +18,42 @@ const ChainInfo = () => {
 
 	const disabled = chainConfiguration !== 'custom';
 
-	const { chainId, restUrl, rpcUrl, installedWallets, supportedWallets, connectedWallet, setInputWallet } = wallet;
+	const { chainId, restUrl, rpcUrl } = wallet;
 
-	const renderSupportedWallet = (walletKey: WalletWindowKey) => {
-		const isWalletInstalled = installedWallets.includes(walletKey);
-		const isWalletConnected = connectedWallet === walletKey;
-
-		const onClickWallet = () => {
-			if (isWalletInstalled && setInputWallet) {
-				setInputWallet(walletKey);
-			} else {
-				switch (walletKey) {
-					case 'keplr':
-						window.open('https://www.keplr.app/download', '_blank');
-						return;
-					case 'leap':
-						window.open('https://www.leapwallet.io/', '_blank');
-						return;
-					case 'coin98':
-						window.open('https://coin98.com/wallet', '_blank');
-						return;
-					case 'falcon':
-						window.open('https://www.falconwallet.app', '_blank');
-						return;
-
-				}
-			}
-		};
-
-		const getButtonText = () => {
-			if (isWalletInstalled) {
-				if (isWalletConnected) return `connected to ${walletKey}`;
-				return `connect to ${walletKey}`;
-			}
-
-			return `install ${walletKey}`;
-		};
-
-		return (
-			<div className='walletButton' onClick={onClickWallet} key={walletKey}>
-				{isWalletConnected && <IoCheckmarkCircleSharp className='connectedIcon' />}
-				{getButtonText()}
-			</div>
-		);
-	};
+	const exampleCodeText = `
+<SeiWalletProvider chainConfiguration={{ chainId: '${chainId}', rpcUrl: '${rpcUrl}', restUrl: '${restUrl}' }} wallets={['compass', 'fin', 'keplr']}>
+	<YourApp />
+</SeiWalletProvider>
+`;
 
 	return (
 		<div className='card'>
-			<h3 className='sectionHeader'>Chain info</h3>
+			<div className={styles.header}>
+				<p className={styles.pageTitle}>Chain configuration</p>
+				<p className={styles.pageDescription}>Set up the connection used throughout this app</p>
+			</div>
 			<div className='infoHeader'>
+				<h3 className='infoHeader--title'>Select a preset</h3>
 				<Dropdown
 					className='dropdown'
-					options={['testnet', 'devnet', 'custom']}
+					options={DEFAULT_CHAINS}
 					onChange={(dropdown) => setChainConfiguration(dropdown.value as any)}
 					value={chainConfiguration}
 					placeholder='Select an option'
 				/>
-				<div className='labelInput'>
-					<p className='label'>chain-id:</p>
-					<input
-						autoFocus={true}
-						placeholder='Custom chain id...'
-						className='input'
-						disabled={disabled}
-						value={disabled ? chainId : customChainId}
-						onChange={(e) => setCustomChainId(e.target.value)}
-					/>
-				</div>
 			</div>
 
+			<div className='labelInput'>
+				<p className='label'>chain-id:</p>
+				<input
+					autoFocus={true}
+					placeholder='Custom chain id...'
+					className='input'
+					disabled={disabled}
+					value={disabled ? chainId : customChainId}
+					onChange={(e) => setCustomChainId(e.target.value)}
+				/>
+			</div>
 			<div className='labelInput'>
 				<p className='label'>rest-url:</p>
 				<input
@@ -108,7 +76,7 @@ const ChainInfo = () => {
 					onChange={(e) => setCustomRpcUrl(e.target.value)}
 				/>
 			</div>
-			<div className='connect'>{supportedWallets.map(renderSupportedWallet)}</div>
+			<CodeExecute text={exampleCodeText} title={'REACT CONFIGURATION EXAMPLE'} />
 		</div>
 	);
 };

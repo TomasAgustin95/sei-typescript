@@ -1,13 +1,11 @@
 .card {
+    flex-direction: column;
     align-items: flex-start;
-    border: var(--white-12) solid 2px;
-    background-color: var(--white-6);
-    flex: 0;
-    max-width: 100%;
-    width: 960px;
-    border-radius: 3px;
-    margin-bottom: 24px;
-    padding: 12px;
+    background-color: var(--white-1);
+    flex: 1;
+    width: 100%;
+    padding: 2rem;
+    gap: 1rem;
 }
 
 .card:last-of-type {
@@ -15,14 +13,20 @@
 }
 
 .cardContent {
-    padding: 12px 0;
+    flex-direction: column;
     width: 100%;
+    gap: 2rem;
+    margin-top: 1rem;
 }
 
 .dropdown {
     margin: 12px 24px 12px 0;
     height: 40px;
-    width: 120px;
+    width: 360px;
+}
+
+.Dropdown-menu {
+    flex-direction: column;
 }
 
 .Dropdown-control {
@@ -40,20 +44,16 @@
     flex-direction: row;
     align-items: center;
     font-weight: 500;
-    padding: 12px;
+    padding: 1rem 1.5rem;
     background-color: var(--white-12);
     border-radius: 6px;
-    margin: 12px 0;
     width: 100%;
+    gap: 1rem;
 }
 
 .label {
-    color: var(--input-placeholder);
-    flex: 0;
-    white-space: nowrap;
-    margin-right: 12px;
-    width: 96px;
-    min-width: 96px;
+    font-size: 1.25rem;
+    color: #f1f1f188;
 }
 
 .input {
@@ -62,7 +62,7 @@
     border: none;
     outline: none;
     flex: 1;
-    font-size: 18px;
+    font-size: 1.25rem;
 }
 
 .input:hover, .input:active, .input:focus {
@@ -78,8 +78,7 @@
 
 .sectionHeader {
     width: 100%;
-    padding-bottom: 12px;
-    border-bottom: var(--white-12) solid 1px;
+    font-size: 1.5rem;
 }
 
 .Toastify__toast-body {
@@ -88,4 +87,40 @@
 
 .Toastify__close-button {
     display: none;
+}
+
+.buttonWrapper {
+    width: fit-content;
+}
+
+.wallet__menu--item {
+    flex-direction: row;
+    color: black;
+}
+
+.walletButton {
+    flex-direction: row;
+    background-color: var(--white-80);
+    color: var(--background-color);
+    align-items: center;
+    justify-content: center;
+    width: 140px;
+    padding: 0.5rem 1rem;
+    margin-right: 12px;
+    border: none;
+    white-space: nowrap;
+    outline: none;
+    cursor: pointer;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: 250ms all ease-out;
+}
+
+.walletButton:hover {
+    opacity: 0.8;
+}
+
+.walletButton:last-of-type {
+    margin-right: 0;
 }

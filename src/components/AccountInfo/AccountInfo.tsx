@@ -1,38 +1,56 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { IoCopySharp, IoSendSharp } from 'react-icons/io5';
-import { toast } from 'react-toastify';
+import { IoSendSharp } from 'react-icons/io5';
 import { useSetRecoilState } from 'recoil';
 import { useQueryClient, useWallet } from '@sei-js/react';
 
 import { BalanceResponseType } from '../../types';
 import { balanceToSendAtom } from '../../recoil';
 import './styles.css';
+import { QueryAllBalancesRequest } from '@sei-js/proto/dist/types/codegen/cosmos/bank/v1beta1/query';
+import { toast } from 'react-toastify';
 
 const AccountInfo = () => {
-	const { offlineSigner, accounts } = useWallet();
+	const { accounts } = useWallet();
 	const { queryClient } = useQueryClient();
+
 	const setBalanceToSend = useSetRecoilState(balanceToSendAtom);
 
 	const [walletBalances, setWalletBalances] = useState<BalanceResponseType[]>([]);
+	const [isFetchingBalances, setIsFetchingBalances] = useState<boolean>(true);
 
-	const walletAccount = useMemo(() => accounts?.[0], [accounts]);
+	const firstAccount = useMemo(() => accounts?.[0], [accounts]);
 
 	useEffect(() => {
-		const fetchBalances = async () => {
-			if (queryClient && walletAccount) {
-				const { balances } = await queryClient.cosmos.bank.v1beta1.allBalances({ address: walletAccount.address });
+		const fetchBalances = async (): Promise<BalanceResponseType[]> => {
+			if (queryClient && firstAccount) {
+				const { balances } = await queryClient.cosmos.bank.v1beta1.allBalances({ address: firstAccount.address } as QueryAllBalancesRequest);
 				return balances as BalanceResponseType[];
 			}
 			return [];
 		};
 
-		fetchBalances().then(setWalletBalances);
-	}, [offlineSigner]);
+		setIsFetchingBalances(true);
+		fetchBalances()
+			.then((balances) => {
+				setIsFetchingBalances(false);
+				setWalletBalances(balances);
+			})
+			.catch((e) => {
+				console.error('Error fetching balances', e.message);
+				toast.error('Error fetching balances');
+				return [];
+			});
+	}, [queryClient, firstAccount]);
 
 	const renderBalances = () => {
-		if (!walletAccount) {
+		if (!firstAccount) {
 			return <p>Wallet not connected</p>;
 		}
+
+		if (isFetchingBalances) {
+			return null;
+		}
+
 		if (walletBalances.length === 0) {
 			return (
 				<div>
@@ -52,21 +70,23 @@ const AccountInfo = () => {
 		});
 	};
 
-	const onClickCopy = () => {
-		toast.info('Copied address to clipboard!');
-		navigator.clipboard.writeText(walletAccount?.address || '').then();
+	const renderContent = () => {
+		return (
+			<div className='tokens'>
+				<div className='tokenRow'>
+					<div className='tokenAmount'>AMOUNT</div>
+					<div className='tokenDenom'>DENOM</div>
+					<div className='icon' />
+				</div>
+				{renderBalances()}
+			</div>
+		);
 	};
 
 	return (
 		<div className='card'>
-			<h3 className='sectionHeader'>Account info</h3>
-			<div className='cardContent'>
-				<div className='addressWrapper'>
-					<p className='accountAddress'>{walletAccount?.address || 'No account found!'}</p>
-					<IoCopySharp className='copy' onClick={onClickCopy} />
-				</div>
-				<div className='tokens'>{renderBalances()}</div>
-			</div>
+			<h3 className='sectionHeader'>Account</h3>
+			<div className='cardContent'>{renderContent()}</div>
 		</div>
 	);
 };

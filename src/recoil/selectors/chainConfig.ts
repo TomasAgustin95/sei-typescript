@@ -1,22 +1,24 @@
-import { ChainConfiguration } from '@sei-js/react';
 import { selector } from 'recoil';
 import { customChainIdAtom, customRestUrlAtom, customRpcUrlAtom, selectedChainConfigAtom } from '../atoms';
+import { CUSTOM, PACIFIC_1 } from '../../config/chains';
+import { ChainConfiguration } from '@sei-js/react';
 
 export const selectedChainConfigSelector = selector<ChainConfiguration>({
 	key: 'selectedChainConfigSelector',
 	get: ({ get }) => {
 		const selectedChainConfig = get(selectedChainConfigAtom);
-		if (selectedChainConfig === 'testnet') {
+		if (selectedChainConfig === PACIFIC_1) {
 			return {
-				chainId: 'atlantic-2',
-				restUrl: 'https://rest.atlantic-2.seinetwork.io/',
-				rpcUrl: 'https://rpc.atlantic-2.seinetwork.io/'
+				chainId: selectedChainConfig,
+				restUrl: `https://rest.wallet.${selectedChainConfig}.sei.io`,
+				rpcUrl: `https://rpc.wallet.${selectedChainConfig}.sei.io`
 			};
-		} else if (selectedChainConfig === 'devnet') {
+		}
+		if (selectedChainConfig !== CUSTOM) {
 			return {
-				chainId: 'sei-devnet-3',
-				restUrl: 'https://rest.sei-devnet-3.seinetwork.io/',
-				rpcUrl: 'https://rpc.sei-devnet-3.seinetwork.io/'
+				chainId: selectedChainConfig,
+				restUrl: `https://rest.${selectedChainConfig}.seinetwork.io`,
+				rpcUrl: `https://rpc.${selectedChainConfig}.seinetwork.io`
 			};
 		}
 
